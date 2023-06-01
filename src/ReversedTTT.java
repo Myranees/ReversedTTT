@@ -14,15 +14,20 @@ public class ReversedTTT extends JFrame implements ActionListener {
         EASY, MEDIUM, HARD
     }
 
-    public ReversedTTT() {
-        this(Difficulty.EASY); // Set default difficulty
-    }
+//    public ReversedTTT() {
+//        this(Difficulty.EASY); // Set default difficulty
+//    }
 
-    public ReversedTTT(Difficulty difficulty) {
+    public ReversedTTT(int difficulty) {
         this.board = new char[3][3];
         this.currentPlayer = 'X';
         this.gameEnd = false;
-        this.difficulty = difficulty;
+        if(difficulty==1)
+            this.difficulty=Difficulty.EASY;
+        else if (difficulty==2)
+            this.difficulty =Difficulty.MEDIUM;
+        else
+            this.difficulty=Difficulty.HARD;
         this.buttons = new JButton[3][3];
         initializeBoard();
         createGUI();
@@ -224,8 +229,20 @@ public class ReversedTTT extends JFrame implements ActionListener {
     }
 
     private void computerMove() {
-        // Add your computer move logic based on the difficulty level
-        // For simplicity, I'll just make a random move
+        switch (difficulty) {
+            case EASY:
+                makeRandomMove();
+                break;
+            case MEDIUM:
+                makeMediumMove();
+                break;
+            case HARD:
+                makeBestMove();
+                break;
+        }
+    }
+
+    private void makeRandomMove() {
         Random random = new Random();
         int row, col;
         do {
@@ -233,6 +250,97 @@ public class ReversedTTT extends JFrame implements ActionListener {
             col = random.nextInt(3);
         } while (board[row][col] != ' ');
         makeMove(row, col);
+    }
+
+    private void makeMediumMove() {
+        // First, check if there is a winning move for the computer
+        int[] winningMove = getWinningMove('O');
+        if (winningMove != null) {
+            makeMove(winningMove[0], winningMove[1]);
+            return;
+        }
+
+        // If no winning move, check if there is a blocking move for the opponent
+        int[] blockingMove = getWinningMove('X');
+        if (blockingMove != null) {
+            makeMove(blockingMove[0], blockingMove[1]);
+            return;
+        }
+
+        // If no winning or blocking move, make a random move
+        makeRandomMove();
+    }
+
+    private void makeBestMove() {
+        int[] bestMove = getBestMove();
+        makeMove(bestMove[0], bestMove[1]);
+    }
+
+    private int[] getWinningMove(char player) {
+        // Check rows
+        for (int row = 0; row < 3; row++) {
+            if (board[row][0] == player && board[row][1] == player && board[row][2] == ' ') {
+                return new int[]{row, 2};
+            }
+            if (board[row][0] == player && board[row][2] == player && board[row][1] == ' ') {
+                return new int[]{row, 1};
+            }
+            if (board[row][1] == player && board[row][2] == player && board[row][0] == ' ') {
+                return new int[]{row, 0};
+            }
+        }
+
+        // Check columns
+        for (int col = 0; col < 3; col++) {
+            if (board[0][col] == player && board[1][col] == player && board[2][col] == ' ') {
+                return new int[]{2, col};
+            }
+            if (board[0][col] == player && board[2][col] == player && board[1][col] == ' ') {
+                return new int[]{1, col};
+            }
+            if (board[1][col] == player && board[2][col] == player && board[0][col] == ' ') {
+                return new int[]{0, col};
+            }
+        }
+
+        // Check diagonals
+        if (board[0][0] == player && board[1][1] == player && board[2][2] == ' ') {
+            return new int[]{2, 2};
+        }
+        if (board[0][0] == player && board[2][2] == player && board[1][1] == ' ') {
+            return new int[]{1, 1};
+        }
+        if (board[1][1] == player && board[2][2] == player && board[0][0] == ' ') {
+            return new int[]{0, 0};
+        }
+        if (board[0][2] == player && board[1][1] == player && board[2][0] == ' ') {
+            return new int[]{2, 0};
+        }
+        if (board[0][2] == player && board[2][0] == player && board[1][1] == ' ') {
+            return new int[]{1, 1};
+        }
+        if (board[2][0] == player && board[1][1] == player && board[0][2] == ' ') {
+            return new int[]{0, 2};
+        }
+
+        return null;
+    }
+
+    private int[] getBestMove() {
+        // Implement your logic to determine the best move for the computer
+        // This can involve using algorithms like Minimax or heuristics to evaluate the best move
+        // Here, I'll just make a random move for demonstration purposes
+        return getRandomEmptyCell();
+    }
+
+    private int[] getRandomEmptyCell() {
+        Random random = new Random();
+        int row, col;
+        do {
+            row = random.nextInt(3);
+            col = random.nextInt(3);
+        } while (board[row][col] != ' ');
+        return new int[]{row, col};
     }
 
     private void resetGame() {
@@ -258,8 +366,7 @@ public class ReversedTTT extends JFrame implements ActionListener {
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
                 ex.printStackTrace();
             }
-            ReversedTTT game = new ReversedTTT();
+            ReversedTTT game = new ReversedTTT(3);
         });
     }
 }
-
